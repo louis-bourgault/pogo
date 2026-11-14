@@ -1,21 +1,27 @@
 extends CharacterBody2D
 
-const ANGLE_CHANGE_SPEED: float = 20
+const ANGLE_CHANGE_SPEED: float = 60
 const SPRING_COMPRESSION_SPEED = 30
 
 var spring_compression: float = 0 #in %
-var spring_length: float = 50
+var max_compression: float = 10
 var spring_angle: float = 0
 var sendoff_vel: float  = 10000
-
+var checkpoint: Node2D = null
+var kill_velocity: float = 1000
 
 var grounded: bool = false
 var pivot_around: Vector2
 var spring_pressed_before = false
 
+func _ready() -> void:
+	checkpoint = %spawn
+	
 func _physics_process(delta: float) -> void:
+	
+	
 	# Add the gravity.
-	if not is_on_floor():
+	if not grounded:
 		velocity += get_gravity() * delta
 		
 	if $groundFinder.is_colliding() and not grounded:
@@ -25,21 +31,22 @@ func _physics_process(delta: float) -> void:
 		$stickpivot.global_position = Vector2(hit_point.x, hit_point.y)
 		velocity.x = 0
 		velocity.y = 0
-		$stickpivot.rotation = 0
-		$stickpivot/upper.position.y = 100
-		spring_angle = 0
+		#$stickpivot.rotation = 0
+		#$stickpivot/upper.position.y = 100
+		#spring_angle = 0
 		spring_compression = 0
 		
-		
+	if Input.is_action_just_pressed("cp"):
+		global_position = checkpoint.global_position
 
 	# Handle spring.
 	
-	if is_on_floor():
+	if grounded:
 		if Input.is_action_pressed("down"):
 			spring_compression += 1 * SPRING_COMPRESSION_SPEED * delta
-			if spring_compression > spring_length:
-				spring_compression = spring_length
-			print('we changed the compression to', spring_compression)
+			if spring_compression > max_compression:
+				spring_compression = max_compression
+			#print('we changed the compression to', spring_compression)
 			spring_pressed_before = true
 		elif spring_pressed_before == true:
 			#we lift off now
@@ -52,14 +59,38 @@ func _physics_process(delta: float) -> void:
 			spring_pressed_before = false
 
 			velocity = launch_direction * sendoff_vel * (spring_compression / 100.0)
+			spring_compression = 0
 		
 	var direction := Input.get_axis("left", "right")
 	if direction:
 		spring_angle += direction * delta * ANGLE_CHANGE_SPEED
-		print('angle is', spring_angle)
+		#print('angle is', spring_angle)
 	
 	#place everything at the right position
 	$stickpivot.rotation_degrees = spring_angle
-	$stickpivot/upper.position.y = -(100-spring_compression)
+	$stickpivot/Sprite2D.compression = spring_compression*0.1
 
 	move_and_slide()
+
+
+
+
+
+func _on_killbox_body_entered(body: Node2D) -> void:
+	print('kill')
+	global_position = checkpoint.global_position
+	pass # Replace with function body.
+
+func _on_checkpoint_finder_area_entered(area: Area2D) -> void:
+	checkpoint = area
+	if checkpoint.flagup:
+		checkpoint.flagup()
+	pass # Replace with function body.
+
+
+func _on_bodykillbox_body_entered(body: Node2D) -> void:
+	
+	if velocity.length()>kill_velocity:
+		global_position = checkpoint.global_position
+		print('kill')
+	pass

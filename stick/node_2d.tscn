@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://biticcoaau7be"]
+
+[ext_resource type="Texture2D" uid="uid://c4i028anpocfh" path="res://pogo.png" id="1_0e48y"]
+[ext_resource type="Script" uid="uid://dq8yylduxw36u" path="res://pogo_tex.gd" id="2_epypp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b83kb"]
+atlas = ExtResource("1_0e48y")
+region = Rect2(0, 0, 11, 22)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ji0rj"]
+atlas = ExtResource("1_0e48y")
+region = Rect2(0, 0, 11, 15)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ta65t"]
+atlas = ExtResource("1_0e48y")
+region = Rect2(4, 15, 3, 7)
+
+[node name="Node2D" type="Node2D" unique_id=96312212]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2013282452]
+position = Vector2(188.75, 238)
+scale = Vector2(17.681818, 17.727274)
+texture = SubResource("AtlasTexture_b83kb")
+script = ExtResource("2_epypp")
+uppertex = SubResource("AtlasTexture_ji0rj")
+lowertex = SubResource("AtlasTexture_ta65t")
+
+[node name="HSlider" type="HSlider" parent="." unique_id=504684653]
+offset_left = 423.0
+offset_top = 64.0
+offset_right = 685.0
+offset_bottom = 261.0
+max_value = 1.0
+step = 0.01
+
+[connection signal="value_changed" from="HSlider" to="Sprite2D" method="_on_h_slider_value_changed"]
