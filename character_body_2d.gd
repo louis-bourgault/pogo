@@ -1,14 +1,17 @@
 extends CharacterBody2D
 
+const trampvelocity = 1300
+
 const ANGLE_CHANGE_SPEED: float = 60
 const SPRING_COMPRESSION_SPEED = 30
+const max_rot = 70
 
 var spring_compression: float = 0 #in %
 var max_compression: float = 10
 var spring_angle: float = 0
 var sendoff_vel: float  = 10000
 var checkpoint: Node2D = null
-var kill_velocity: float = 1000
+var kill_velocity: float = 10000000000
 
 var grounded: bool = false
 var pivot_around: Vector2
@@ -20,21 +23,25 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	
 	
+	
 	# Add the gravity.
 	if not grounded:
 		velocity += get_gravity() * delta
 		
 	if $groundFinder.is_colliding() and not grounded:
-		grounded = true
-		var hit_point = $groundFinder.get_collision_point()
-		pivot_around = hit_point
-		$stickpivot.global_position = Vector2(hit_point.x, hit_point.y)
-		velocity.x = 0
-		velocity.y = 0
-		#$stickpivot.rotation = 0
-		#$stickpivot/upper.position.y = 100
-		#spring_angle = 0
-		spring_compression = 0
+		if velocity.y <= 0:
+			print("we shouldn't be doing this")
+		else:
+			grounded = true
+			var hit_point = $groundFinder.get_collision_point()
+			pivot_around = hit_point
+			$stickpivot.global_position = Vector2(hit_point.x, hit_point.y)
+			velocity.x = 0
+			velocity.y = 0
+			#$stickpivot.rotation = 0
+			#$stickpivot/upper.position.y = 100
+			#spring_angle = 0
+			spring_compression = 0
 		
 	if Input.is_action_just_pressed("cp"):
 		global_position = checkpoint.global_position
@@ -62,9 +69,11 @@ func _physics_process(delta: float) -> void:
 			spring_compression = 0
 		
 	var direction := Input.get_axis("left", "right")
+	
 	if direction:
-		spring_angle += direction * delta * ANGLE_CHANGE_SPEED
-		#print('angle is', spring_angle)
+		var new_angle = spring_angle + direction * delta * ANGLE_CHANGE_SPEED
+		if abs(new_angle) <= max_rot:
+			spring_angle = new_angle
 	
 	#place everything at the right position
 	$stickpivot.rotation_degrees = spring_angle
@@ -87,10 +96,30 @@ func _on_checkpoint_finder_area_entered(area: Area2D) -> void:
 		checkpoint.flagup()
 	pass # Replace with function body.
 
-
 func _on_bodykillbox_body_entered(body: Node2D) -> void:
 	
 	if velocity.length()>kill_velocity:
 		global_position = checkpoint.global_position
 		print('kill')
 	pass
+
+
+
+
+func _on_tramp_body_entered(body: Node2D) -> void:
+	velocity.y -= trampvelocity
+
+
+
+func _on_trampleft_body_entered(body: Node2D) -> void:
+	velocity.x += 0.7 * trampvelocity
+	velocity.y -= 0.7 * trampvelocity
+	pass # Replace with function body.
+
+
+
+
+func _on_trampright_body_entered(body: Node2D) -> void:
+	velocity.x -= 0.7 * trampvelocity
+	velocity.y -= 0.7 * trampvelocity
+	pass # Replace with function body.

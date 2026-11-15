@@ -1,3 +1,11 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+/export/
+*.zip
+
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
+._.DS_Store

@@ -64,6 +64,9 @@ cp={
 2d_physics/layer_2="player"
 2d_physics/layer_3="die"
 2d_physics/layer_4="checkpoint"
+2d_physics/layer_5="tramp"
+2d_physics/layer_6="left tramp"
+2d_physics/layer_7="right tramp"
 
 [physics]
 
